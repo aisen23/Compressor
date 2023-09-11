@@ -13,8 +13,6 @@ namespace ai
         using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
 
     public:
-        Clock() = default;
-
         TimePoint Now() const;
         void PrintDurationFrom(const TimePoint& from) const;
 
