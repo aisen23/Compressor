@@ -11,26 +11,43 @@ int main() {
     auto srcArray = ai::data_utils::CreateAnArray(ARRAY_SIZE);
 
     // Just for benchmarking.
-    ai::Clock clock;
-    auto start = clock.Now();
 
 
-
+    char* compressed = nullptr;
+    std::vector<int> decompressedArray;
     // Real test (and example) for compressing and decompressing.
     {   
-        // Dumb operations.
-        long sum = 0;
-        for (long i = 0; i != 7000000; ++i) {
-            sum += 1;
-        }
+        ai::Clock clock;
+        auto startCompressTime = clock.Now();
+        
+        compressed = ai::data_utils::CompressArray(srcArray);
+
+        std::cout << "Compressing duration: ";
+        clock.PrintDurationFrom(startCompressTime);
+
+        auto startDecompressTime = clock.Now();
+
+        decompressedArray = ai::data_utils::DecompressToArray(compressed, ARRAY_SIZE);
+        
+        std::cout << "Decompressing duration: ";
+        clock.PrintDurationFrom(startDecompressTime);
+        std::cout << "\n";
     }
 
 
 
-    clock.PrintDurationFrom(start);
+    std::cout << "Source array size: " << sizeof(int) * ARRAY_SIZE + sizeof(std::vector<int>) << std::endl;
+    std::cout << "Compressed size: " << sizeof(char) * ARRAY_SIZE << "\n\n";
 
     ai::data_utils::PrintArray("Source array", srcArray);
-    //PrintArray("The decompressed array", decompArray);
+
+    ai::data_utils::PrintCompressed(compressed, ARRAY_SIZE);
+
+    ai::data_utils::PrintArray("Decompressed array", decompressedArray);
+
+    if (compressed) {
+        delete[] compressed;
+    }
 
     std::cin.get();
     return 0;
