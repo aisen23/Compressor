@@ -4,6 +4,9 @@
 
 namespace ai
 {
+    /** Class for measuring elapsed time
+     * for benchmarking algorithm.
+     * */
     class Clock
     {
     public:
