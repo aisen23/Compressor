@@ -10,7 +10,7 @@ int main() {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     // Init random source array.
-    auto srcArray = ai::data_utils::CreateAnArray(ARRAY_SIZE);
+    auto srcArray = ai::utils::CreateAnArray(ARRAY_SIZE);
 
 
     // Real test (and example) for compressing and uncompressing.
@@ -47,11 +47,11 @@ int main() {
     std::cout << "Source array size: " << sizeof(int) * srcArray.size() << std::endl;
     std::cout << "Compressed size: " << sizeof(uint8_t) * compressed.size() << "\n\n";
 
-    ai::data_utils::PrintArray<int>("Source array", srcArray);
+    ai::utils::PrintArray<int>("Source array", srcArray);
 
-    ai::data_utils::PrintArray<uint8_t>("Compressed array", compressed);
+    ai::utils::PrintArray<uint8_t>("Compressed array", compressed);
 
-    ai::data_utils::PrintArray<int>("Uncompressed array", decompressedArray);
+    ai::utils::PrintArray<int>("Uncompressed array", decompressedArray);
 
     std::cin.get();
     return 0;
