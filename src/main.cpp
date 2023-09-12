@@ -22,7 +22,7 @@ int main() {
         {
             auto startCompressTime = clock.Now();
 
-            ai::Compressor compressor();
+            ai::Compressor compressor;
             compressed = compressor.Compress(srcArray);
 
             std::cout << "Compressing duration: ";
@@ -32,7 +32,7 @@ int main() {
         {
             auto startDecompressTime = clock.Now();
 
-            ai::Uncompressor uncompressor();
+            ai::Compressor uncompressor;
             decompressedArray = uncompressor.Uncompress(compressed);
 
             std::cout << "Decompressing duration: ";
@@ -47,11 +47,11 @@ int main() {
     std::cout << "Source array size: " << sizeof(int) * srcArray.size() << std::endl;
     std::cout << "Compressed size: " << sizeof(uint8_t) * compressed.size() << "\n\n";
 
-    ai::utils::PrintArray<int>("Source array", srcArray);
+    ai::utils::PrintArray("Source array", srcArray);
 
-    ai::utils::PrintArray<uint8_t>("Compressed array", compressed);
+    ai::utils::PrintArray("Compressed array", compressed);
 
-    ai::utils::PrintArray<int>("Uncompressed array", decompressedArray);
+    ai::utils::PrintArray("Uncompressed array", decompressedArray);
 
     std::cin.get();
     return 0;
