@@ -13,16 +13,16 @@ namespace ai
     class ThreadPool
     {
     public:
-        explicit ThreadPool(size_t numThreads);
+        static ThreadPool& Instance();
         ~ThreadPool();
 
         template <typename Function, typename... Args>
-        auto AddTask(Function&& f, Args&&... args) -> std::future<decltype(f(args...))> {
+        auto Submit(Function&& f, Args&&... args) -> std::future<decltype(f(args...))> {
             using ReturnType = decltype(f(args...));
             std::future<ReturnType> result;
             {
-                std::guard_lock lock(_tasksMutex);
-                if (stop) {
+                std::lock_guard lock(_tasksMutex);
+                if (_stop) {
                     return result;
                 }
 
@@ -37,6 +37,9 @@ namespace ai
             _tasksCond.notify_one();
             return result;
         }
+
+    private:
+        explicit ThreadPool();
 
     private:
         std::vector<std::thread> _workers;

@@ -2,41 +2,45 @@
 
 #include "clock/Clock.h"
 #include "Compressor.h"
-#include "DataUtils.h"
+#include "Utils.h"
 
-const size_t ARRAY_SIZE = 1000000;
+#include <stdlib.h>
+
+/** All classes and functions optimized for
+ * input data of this task (integers from 1 to 100)
+ * */
 
 int main() {
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     // Init random source array.
-    auto srcArray = ai::utils::CreateAnArray(ARRAY_SIZE);
+    auto srcArray = ai::utils::CreateRandomArray();
 
 
     // Real test (and example) for compressing and uncompressing.
     std::vector<uint8_t> compressed;
-    std::vector<int> decompressedArray;
+    std::vector<unsigned> restoredArray;
 
     {   
         ai::Clock clock;
         {
             auto startCompressTime = clock.Now();
 
-            ai::Compressor compressor;
+            ai::Compressor compressor(ai::eCompressorType::Compressor);
             compressed = compressor.Compress(srcArray);
 
             std::cout << "Compressing duration: ";
-            clock.PrintDurationFrom(startCompressTime);
+            clock.PrintDuration(startCompressTime);
         }
 
         {
             auto startDecompressTime = clock.Now();
 
-            ai::Compressor uncompressor;
-            decompressedArray = uncompressor.Uncompress(compressed);
+            ai::Compressor uncompressor(ai::eCompressorType::Uncompressor);
+            restoredArray = uncompressor.Uncompress(compressed);
 
             std::cout << "Decompressing duration: ";
-            clock.PrintDurationFrom(startDecompressTime);
+            clock.PrintDuration(startDecompressTime);
             std::cout << "\n";
         }
     }
@@ -44,14 +48,14 @@ int main() {
 
 
     // Benchmarking: 
-    std::cout << "Source array size: " << sizeof(int) * srcArray.size() << std::endl;
+    std::cout << "Source array size: " << sizeof(unsigned) * srcArray.size() << std::endl;
     std::cout << "Compressed size: " << sizeof(uint8_t) * compressed.size() << "\n\n";
 
     ai::utils::PrintArray("Source array", srcArray);
 
     ai::utils::PrintArray("Compressed array", compressed);
 
-    ai::utils::PrintArray("Uncompressed array", decompressedArray);
+    ai::utils::PrintArray("Uncompressed array", restoredArray);
 
     std::cin.get();
     return 0;

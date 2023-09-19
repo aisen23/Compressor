@@ -16,7 +16,7 @@ namespace ai
         Clock() = default;
 
         TimePoint Now() const;
-        void PrintDurationFrom(const TimePoint& from) const;
+        void PrintDuration(const TimePoint& from) const;
 
     private:
         Clock(const Clock&) = delete;

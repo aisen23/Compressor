@@ -1,29 +1,31 @@
 #pragma once
 
-#include "Data.h"
-#include "ThreadPool.h"
-
 #include <cstdint>
 #include <vector>
 
 namespace ai
 {
+    enum class eCompressorImplType : int {
+        None,
+        Easy,
+        Huffman
+    };
+
     class Compressor;
     class CompressorImpl
     {
     public:
-        explicit CompressorImpl(Compressor* comp);
+        explicit CompressorImpl(eCompressorImplType type);
         virtual ~CompressorImpl() = default;
 
-        virtual std::vector<uint8_t> Compress(const std::vector<int>& array) = 0;
-        virtual std::vector<int> Uncompress(const std::vector<uint8_t>& buffer) = 0;
-
+        virtual std::vector<uint8_t> Compress(const std::vector<unsigned>& arr) = 0;
+        virtual std::vector<unsigned> Uncompress(const std::vector<uint8_t>& data, size_t offset) = 0;
     protected:
-        Compressor* _comp = nullptr;
+        eCompressorImplType _type;
     };
 
 
-    enum class eCompressorType : uint8_t {
+    enum class eCompressorType : int {
         Compressor,
         Uncompressor
     };
@@ -32,23 +34,18 @@ namespace ai
     class Compressor
     {
     public:
-        explicit Compressor(eCompressorType type, size_t numThreads = 8);
-        ~Compressor();
+        explicit Compressor(eCompressorType type);
+        ~Compressor() = default;
 
-        std::vector<uint8_t> Compress(const std::vector<int>& array);
-        std::vector<int> Uncompress(const std::vector<uint8_t>& buffer);
+        std::vector<uint8_t> Compress(const std::vector<unsigned>& arr) const;
+        std::vector<unsigned> Uncompress(const std::vector<uint8_t>& data) const;
 
     private:
-        template <typename Function, typename... Args>
-        auto ScheduleTask(Function&& f, Args&&... args) {
-            if (_pool) {
-                _pool->AddTask(std::forward<Function>(f), std::forward<Args>(args)...);
-            }
-        }
+        std::vector<uint8_t> WriteImplType(eCompressorImplType type) const;
+        eCompressorImplType ReadImplType(const std::vector<uint8_t>& data, size_t& offset) const;
 
     private:
         eCompressorType _type;
-        ThreadPool* _pool = nullptr;
 
     private:
         Compressor(const Compressor&) = delete;

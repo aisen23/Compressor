@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(as_test_1 VERSION 1.0.0)
+project(as_test_1)
 set(CMAKE_BUILD_TYPE Debug)
 
 set(CMAKE_CXX_STANDARD_REQUIRED FALSE)
