@@ -9,19 +9,9 @@
 #pragma comment(lib, "ws2_32.lib")
 #endif
 
-ai::HuffmanTree::HuffmanTree(HuffmanTree&& src) noexcept
-{
-    _root = src._root;
-    _freqTable = std::move(src._freqTable);
-
-    src._root = nullptr;
-}
-
 ai::HuffmanTree::~HuffmanTree()
 {
-    if (_root) {
-        Free(_root);
-    }
+    Free(_root);
 }
 
 void ai::HuffmanTree::Free(Node* node) {
@@ -58,10 +48,10 @@ std::vector<uint8_t> ai::HuffmanTree::Encode(const std::vector<char>& chars) {
         return {};
     }
 
-
     std::vector<uint8_t> arr;
+
     size_t offset = 0;
-    WriteTable(arr, offset);
+    WriteFreqTable(arr, offset);
 
     uint32_t bitsSize = 0;
     std::vector<uint8_t> codes;
@@ -105,8 +95,6 @@ std::vector<uint8_t> ai::HuffmanTree::Encode(const std::vector<char>& chars) {
 }
 
 std::vector<char> ai::HuffmanTree::Decode(const std::vector<uint8_t>& data, size_t offset) {
-    HuffmanTree tree;
-    
     ReadFreqTable(data, offset);
     assert(!_freqTable.empty());    
     if (_freqTable.empty()) {
@@ -170,7 +158,7 @@ void ai::HuffmanTree::InitCodesTable() {
 
         if (node->value != 0) {
 #ifdef DEBUG_BUILD
-            std::cout << "Char: " << node->value << ", freq: " << node->freq << ", ";
+            std::cout << "Char: " << (_isChar ? node->value : static_cast<unsigned>(node->value)) << ", freq: " << node->freq << ", ";
             for (auto c : code) {
                 std::cout << static_cast<int>(c);
             }
@@ -196,9 +184,11 @@ void ai::HuffmanTree::InitCodesTable() {
 }
 
 void ai::HuffmanTree::InitTree() {
+    assert(_root == nullptr && !_freqTable.empty());
+    Free(_root);
 
     if (_freqTable.empty()) {
-        _root = nullptr;
+        std::cerr << "Error: ai::HuffmanTree::InitTree(): no frequency table" << std::endl;
         return;
     }
 
@@ -210,7 +200,6 @@ void ai::HuffmanTree::InitTree() {
         queue.push(node);
     }
 
-    // TODO: Check order.
     while (queue.size() > 1) {
         auto left = queue.top();
         queue.pop();
@@ -240,7 +229,6 @@ void ai::HuffmanTree::ReadFreqTable(const std::vector<uint8_t>& data, size_t& of
     size_t size = static_cast<size_t>(data[offset++]);
 
     // 5 bytes. First byte - char, others - uint32_t frequency of this char.
-    
     for (size_t i = 0; i <= 5 * size - 5; i += 5) {
         size_t index = offset + i;
         char ch = static_cast<char>(data[index]);
@@ -274,7 +262,7 @@ void ai::HuffmanTree::InitFreqTable(const std::vector<char>& chars) {
     }
 }
 
-void ai::HuffmanTree::WriteTable(std::vector<uint8_t>& data, size_t& offset) const {
+void ai::HuffmanTree::WriteFreqTable(std::vector<uint8_t>& data, size_t& offset) const {
     assert(!_freqTable.empty());
 
     // Optimized to this task input.

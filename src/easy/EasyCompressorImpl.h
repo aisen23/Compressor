@@ -7,7 +7,7 @@ namespace ai
     class EasyCompressorImpl : public CompressorImpl
     {
     public:
-        EasyCompressorImpl();
+        EasyCompressorImpl() = default;
 
         std::vector<uint8_t> Compress(const std::vector<unsigned>& arr) final override;
         std::vector<unsigned> Uncompress(const std::vector<uint8_t>& data, size_t offset) final override;

@@ -24,7 +24,7 @@ namespace ai
             };
 
         public:
-            explicit HuffmanTree(HuffmanTree&& src) noexcept;
+            explicit HuffmanTree(bool isChar) : _isChar(isChar) {};
             ~HuffmanTree();
 
         private:
@@ -40,7 +40,7 @@ namespace ai
 
             void InitCodesTable();
 
-            void WriteTable(std::vector<uint8_t>& data, size_t& offset) const;
+            void WriteFreqTable(std::vector<uint8_t>& data, size_t& offset) const;
             void ReadFreqTable(const std::vector<uint8_t>& data, size_t& offset);
 
         private:
@@ -48,6 +48,7 @@ namespace ai
             Node* _root = nullptr;
             std::unordered_map<char, std::vector<uint8_t>> _codesTable;
             std::map<char, uint32_t> _freqTable;
+            bool _isChar = false;
 
         private:
             HuffmanTree(const HuffmanTree&) = delete;

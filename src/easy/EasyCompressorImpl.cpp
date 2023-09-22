@@ -2,10 +2,6 @@
 
 #include "EasyCompressorImpl.h"
 
-ai::EasyCompressorImpl::EasyCompressorImpl()
-    : CompressorImpl(eCompressorImplType::Easy)
-{}
-
 std::vector<uint8_t> ai::EasyCompressorImpl::Compress(const std::vector<unsigned>& arr) {
     if (arr.empty()) {
         std::cerr << "Error: ai::EasyCompressorImpl::Compress(): array is empty()" << std::endl;

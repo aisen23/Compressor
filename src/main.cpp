@@ -14,7 +14,7 @@ int main() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     // Init random source array.
-    auto srcArray = ai::utils::CreateRandomArray();
+    auto srcArray = ai::utils::CreateConsecutiveArray();
 
 
     // Real test (and example) for compressing and uncompressing.
