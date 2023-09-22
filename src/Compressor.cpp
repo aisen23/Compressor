@@ -1,7 +1,9 @@
 #include "pch.h"
 
 #include "Compressor.h"
+
 #include "huffman/HuffmanCompressorImpl.h"
+#include "easy/EasyCompressorImpl.h"
 
 ai::CompressorImpl::CompressorImpl(eCompressorImplType type)
     : _type(type)
@@ -18,11 +20,8 @@ std::vector<uint8_t> ai::Compressor::Compress(const std::vector<unsigned>& arr) 
 
     std::vector<std::vector<uint8_t>> datas;
 
-    auto dataHuffman = WriteImplType(eCompressorImplType::Huffman);
-    HuffmanCompressorImpl huffImpl;
-    auto huffImplData = huffImpl.Compress(arr);
-    dataHuffman.insert(dataHuffman.end(), huffImplData.begin(), huffImplData.end());
-    datas.push_back(std::move(dataHuffman));
+    datas.push_back(CompressWithHuffman(arr));
+    datas.push_back(CompressWithEasy(arr));
 
 
 
@@ -52,12 +51,14 @@ std::vector<unsigned> ai::Compressor::Uncompress(const std::vector<uint8_t>& dat
 
     switch (type) {
         case eCompressorImplType::Huffman: {
-            HuffmanCompressorImpl impl;
-            return impl.Uncompress(data, offset);
+            return UncompressWithHuffman(data, offset);
         }
-        case eCompressorImplType::Easy:
+        case eCompressorImplType::Easy: {
+            return UncompressWithEasy(data, offset);
+        }
         case eCompressorImplType::None:
         default: {
+            std::cerr << "Error: ai::Compressor::Uncompress(): incorrect data." << std::endl;
             break;
         }
     }
@@ -79,4 +80,30 @@ ai::eCompressorImplType ai::Compressor::ReadImplType(const std::vector<uint8_t>&
     }
 
     return type;
+}
+
+std::vector<uint8_t> ai::Compressor::CompressWithHuffman(const std::vector<unsigned>& arr) const {
+    auto data = WriteImplType(eCompressorImplType::Huffman);
+    HuffmanCompressorImpl impl;
+    auto implData = impl.Compress(arr);
+    data.insert(data.end(), implData.begin(), implData.end());
+    return data;
+}
+
+std::vector<unsigned> ai::Compressor::UncompressWithHuffman(const std::vector<uint8_t>& data, size_t offset) const {
+    HuffmanCompressorImpl impl;
+    return impl.Uncompress(data, offset);
+}
+
+std::vector<uint8_t> ai::Compressor::CompressWithEasy(const std::vector<unsigned>& arr) const {
+    auto data = WriteImplType(eCompressorImplType::Easy);
+    EasyCompressorImpl impl;
+    auto implData = impl.Compress(arr);
+    data.insert(data.end(), implData.begin(), implData.end());
+    return data;
+}
+
+std::vector<unsigned> ai::Compressor::UncompressWithEasy(const std::vector<uint8_t>& data, size_t offset) const {
+    EasyCompressorImpl impl;
+    return impl.Uncompress(data, offset);
 }

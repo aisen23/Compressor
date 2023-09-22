@@ -44,6 +44,12 @@ namespace ai
         std::vector<uint8_t> WriteImplType(eCompressorImplType type) const;
         eCompressorImplType ReadImplType(const std::vector<uint8_t>& data, size_t& offset) const;
 
+        std::vector<uint8_t> CompressWithHuffman(const std::vector<unsigned>& arr) const;
+        std::vector<unsigned> UncompressWithHuffman(const std::vector<uint8_t>& data, size_t offset) const;
+
+        std::vector<uint8_t> CompressWithEasy(const std::vector<unsigned>& arr) const;
+        std::vector<unsigned> UncompressWithEasy(const std::vector<uint8_t>& data, size_t offset) const;
+
     private:
         eCompressorType _type;
 
