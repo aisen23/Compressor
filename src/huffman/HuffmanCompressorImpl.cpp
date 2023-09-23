@@ -5,26 +5,14 @@
 #include "HuffmanTree.h"
 #include "Utils.h"
 
-ai::HuffmanCompressorImpl::HuffmanCompressorImpl(bool isChar)
-    : _isChar(isChar)
-{
-}
-
 std::vector<uint8_t> ai::HuffmanCompressorImpl::Compress(const std::vector<unsigned>& arr) {
-    std::vector<char> chars;
-    if (_isChar) {
-        // TODO: Check to std::move
-        chars = utils::UintArrayToCharArray(arr);
-    }
-    else {
-        chars.resize(arr.size());
-        for (size_t i = 0; i != arr.size(); ++i) {
-            chars[i] = static_cast<char>(arr[i]);
-        }
+    std::vector<uint8_t> arr8(arr.size());
+    for (size_t i = 0; i != arr.size(); ++i) {
+        arr8[i] = static_cast<uint8_t>(arr[i]);
     }
 
-    HuffmanTree tree(_isChar);
-    auto data = tree.Encode(chars);
+    HuffmanTree tree;
+    auto data = tree.Encode(arr8);
 
     return data;
 }
@@ -34,16 +22,12 @@ std::vector<unsigned> ai::HuffmanCompressorImpl::Uncompress(const std::vector<ui
         return {};
     }
 
-    HuffmanTree tree(_isChar);
-    auto chars = tree.Decode(data, offset);
+    HuffmanTree tree;
+    auto arr8 = tree.Decode(data, offset);
 
-    if (_isChar) {
-        return utils::CharArrayToUintArray(chars);
-    }
-
-    std::vector<unsigned> arr(chars.size());
-    for (size_t i = 0; i != chars.size(); ++i) {
-        arr[i] = static_cast<unsigned>(chars[i]);
+    std::vector<unsigned> arr(arr8.size());
+    for (size_t i = 0; i != arr8.size(); ++i) {
+        arr[i] = static_cast<unsigned>(arr8[i]);
     }
 
     return arr;

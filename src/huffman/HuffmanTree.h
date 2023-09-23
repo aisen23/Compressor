@@ -12,7 +12,7 @@ namespace ai
         private:
             struct Node
             {
-                char value = 0;
+                int8_t value = 0;
                 uint32_t freq = 0;
 
                 Node* left = nullptr;
@@ -24,19 +24,18 @@ namespace ai
             };
 
         public:
-            explicit HuffmanTree(bool isChar) : _isChar(isChar) {};
             ~HuffmanTree();
 
         private:
             HuffmanTree() = default;
 
-            void InitFreqTable(const std::vector<char>& chars);
+            void InitFreqTable(const std::vector<uint8_t>& arr);
             void InitTree();
 
             void Free(Node* node);
 
-            std::vector<uint8_t> Encode(const std::vector<char>& chars);
-            std::vector<char> Decode(const std::vector<uint8_t>& data, size_t offset);
+            std::vector<uint8_t> Encode(const std::vector<uint8_t>& arr);
+            std::vector<uint8_t> Decode(const std::vector<uint8_t>& data, size_t offset);
 
             void InitCodesTable();
 
@@ -46,9 +45,8 @@ namespace ai
         private:
             friend class HuffmanCompressorImpl;
             Node* _root = nullptr;
-            std::unordered_map<char, std::vector<uint8_t>> _codesTable;
-            std::map<char, uint32_t> _freqTable;
-            bool _isChar = false;
+            std::unordered_map<int8_t, std::vector<uint8_t>> _codesTable;
+            std::map<int8_t, uint32_t> _freqTable;
 
         private:
             HuffmanTree(const HuffmanTree&) = delete;

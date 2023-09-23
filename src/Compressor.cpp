@@ -4,6 +4,7 @@
 
 #include "huffman/HuffmanCompressorImpl.h"
 #include "easy/EasyCompressorImpl.h"
+#include "rle/RLECompressorImpl.h"
 
 ai::Compressor::Compressor(ai::eCompressorType type)
     :_type(type)
@@ -17,9 +18,8 @@ std::vector<uint8_t> ai::Compressor::Compress(const std::vector<unsigned>& arr) 
     std::vector<std::vector<uint8_t>> datas;
 
     datas.push_back(CompressWithEasy(arr));
-    datas.push_back(CompressWithHuffman(arr, true));
-    datas.push_back(CompressWithHuffman(arr, false));
-
+    datas.push_back(CompressWithHuffman(arr));
+    datas.push_back(CompressWithRLE(arr));
 
 
 // -=-= -=-= -=- =- =- =- Calculate the effective compression =- = =- =-= -=- = -=- =- =
@@ -47,14 +47,14 @@ std::vector<unsigned> ai::Compressor::Uncompress(const std::vector<uint8_t>& dat
     auto type = ReadImplType(data, offset);
 
     switch (type) {
-        case eCompressorImplType::HuffmanChar: {
-            return UncompressWithHuffman(data, offset, true);
-        }
-        case eCompressorImplType::HuffmanUint: {
-            return UncompressWithHuffman(data, offset, false);
+        case eCompressorImplType::Huffman: {
+            return UncompressWithHuffman(data, offset);
         }
         case eCompressorImplType::Easy: {
             return UncompressWithEasy(data, offset);
+        }
+        case eCompressorImplType::RLE: {
+            return UncompressWithRLE(data, offset);
         }
         case eCompressorImplType::None:
         default: {
@@ -82,17 +82,16 @@ ai::eCompressorImplType ai::Compressor::ReadImplType(const std::vector<uint8_t>&
     return type;
 }
 
-std::vector<uint8_t> ai::Compressor::CompressWithHuffman(const std::vector<unsigned>& arr, bool isChar) const {
-    auto type = (isChar ? eCompressorImplType::HuffmanChar : eCompressorImplType::HuffmanUint);
-    auto data = WriteImplType(type);
-    HuffmanCompressorImpl impl(isChar);
+std::vector<uint8_t> ai::Compressor::CompressWithHuffman(const std::vector<unsigned>& arr) const {
+    auto data = WriteImplType(eCompressorImplType::Huffman);
+    HuffmanCompressorImpl impl;
     auto implData = impl.Compress(arr);
     data.insert(data.end(), implData.begin(), implData.end());
     return data;
 }
 
-std::vector<unsigned> ai::Compressor::UncompressWithHuffman(const std::vector<uint8_t>& data, size_t offset, bool isChar) const {
-    HuffmanCompressorImpl impl(isChar);
+std::vector<unsigned> ai::Compressor::UncompressWithHuffman(const std::vector<uint8_t>& data, size_t offset) const {
+    HuffmanCompressorImpl impl;
     return impl.Uncompress(data, offset);
 }
 
@@ -106,5 +105,18 @@ std::vector<uint8_t> ai::Compressor::CompressWithEasy(const std::vector<unsigned
 
 std::vector<unsigned> ai::Compressor::UncompressWithEasy(const std::vector<uint8_t>& data, size_t offset) const {
     EasyCompressorImpl impl;
+    return impl.Uncompress(data, offset);
+}
+
+std::vector<uint8_t> ai::Compressor::CompressWithRLE(const std::vector<unsigned>& arr) const {
+    auto data = WriteImplType(eCompressorImplType::RLE);
+    RLECompressorImpl impl;
+    auto implData = impl.Compress(arr);
+    data.insert(data.end(), implData.begin(), implData.end());
+    return data;
+}
+
+std::vector<unsigned> ai::Compressor::UncompressWithRLE(const std::vector<uint8_t>& data, size_t offset) const {
+    RLECompressorImpl impl;
     return impl.Uncompress(data, offset);
 }

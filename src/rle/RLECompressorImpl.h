@@ -4,16 +4,16 @@
 
 namespace ai
 {
-    class HuffmanCompressorImpl : public CompressorImpl
+    class RLECompressorImpl : public CompressorImpl
     {
     public:
-        HuffmanCompressorImpl() = default;
+        RLECompressorImpl() = default;
 
         std::vector<uint8_t> Compress(const std::vector<unsigned>& arr) final override;
         std::vector<unsigned> Uncompress(const std::vector<uint8_t>& data, size_t offset) final override;
 
     private:
-        HuffmanCompressorImpl(const HuffmanCompressorImpl&) = delete;
-        HuffmanCompressorImpl& operator=(const HuffmanCompressorImpl&) = delete;
+        RLECompressorImpl(const RLECompressorImpl&) = delete;
+        RLECompressorImpl& operator=(const RLECompressorImpl&) = delete;
     };
 } // ai

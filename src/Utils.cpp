@@ -4,6 +4,13 @@
 
 #include "Input.h"
 
+#ifdef __linux__
+#include <arpa/inet.h>
+#elif _WIN32
+#include <winsock2.h>
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 namespace ai::utils
 {
     std::vector<unsigned> CreateRandomArray() {
@@ -12,6 +19,45 @@ namespace ai::utils
 
         for (size_t i = 0; i != size; ++i) {
             arr[i] = rand() % (ai::MAX_ELEM - ai::MIN_ELEM + 1) + ai::MIN_ELEM;
+        }
+
+        return arr;
+    }
+
+    std::vector<unsigned> CreateRandomArrayWithConsecutiveOrRangeElements() {
+        size_t size = ai::ARRAY_SIZE;
+        std::vector<unsigned> arr(size);
+
+        std::vector<int> types = { 0, 0, 0 };
+        unsigned prev = 0;
+        for (size_t i = 0; i != size; ++i) {
+            if ((types[0]--) > 0) {
+                arr[i] = prev + 1;
+                if (arr[i] >= ai::MAX_ELEM) {
+                    arr[i] = ai::MAX_ELEM;
+                    types[0] = 0;
+                }
+            }
+            else if ((types[1]--) > 0) {
+                arr[i] = prev - 1;
+                if (arr[i] <= ai::MIN_ELEM) {
+                    arr[i] = ai::MIN_ELEM;
+                    types[1] = 0;
+                }
+            }
+            else if (prev > 0 && (types[2]--) > 0) {
+                arr[i] = prev;
+            }
+            else {
+                arr[i] = rand() % (ai::MAX_ELEM - ai::MIN_ELEM + 1) + ai::MIN_ELEM;
+
+                int type = rand() % 20;
+                if (type < 3) {
+                    int rNum = rand() % (ai::MAX_ELEM - ai::MIN_ELEM + 1) + ai::MIN_ELEM; 
+                    types[type] = rNum;
+                }
+            }
+            prev = arr[i];
         }
 
         return arr;
@@ -27,62 +73,6 @@ namespace ai::utils
             ++num;
             if (num > ai::MAX_ELEM) {
                 num = ai::MIN_ELEM;
-            }
-        }
-
-        return arr;
-    }
-
-    std::vector<char> UintArrayToCharArray(const std::vector<unsigned>& arr) {
-        std::vector<char> chars;
-        char divider = ' ';
-
-        if (arr.size() > 0) {
-            for (size_t i = 0; i != arr.size(); ++i) {
-                unsigned num = arr[i];
-                while (num != 0) {
-                    unsigned digit = num % 10;
-                    chars.push_back(UintToChar(digit));
-                    num /= 10;
-                }
-
-                if (i != arr.size() - 1) {
-                    chars.push_back(divider);
-                }
-            }
-        }
-
-        return chars;
-    }
-        
-    std::vector<unsigned> CharArrayToUintArray(const std::vector<char>& chars) {
-        std::vector<unsigned> arr;
-        auto size = chars.size();
-        char divider = ' ';
-
-        if (size > 0) {
-            unsigned num = 0;
-            std::vector<unsigned> nums;
-            for (size_t i = 0; i != size; ++i) {
-                char ch = chars[i];
-                if (std::isdigit(ch)) {
-                    nums.push_back(CharToUint(ch));
-                }
-                
-                bool isLast = i == size - 1;
-                if (ch == divider || isLast) {
-                    assert(ch == divider || isLast);
-                    assert(!nums.empty());
-                    int mult = 1;
-                    for (auto n : nums) {
-                        num += (n * mult);
-                        mult *= 10;
-                    }
-
-                    arr.push_back(num);
-                    num = 0;
-                    nums.clear();
-                }
             }
         }
 
@@ -108,5 +98,27 @@ namespace ai::utils
         }
 
         return 0 + static_cast<unsigned>(ch - '0');
+    }
+
+    bool CompareArrays(const std::vector<unsigned>& arr1, const std::vector<unsigned>& arr2) {
+        if (arr1.size() != arr2.size()) {
+            return false;
+        }
+
+        for (size_t i = 0; i != arr1.size(); ++i) {
+            if (arr1[i] != arr2[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    uint32_t htonl(uint32_t hostValue) {
+        return ::htonl(hostValue);
+    }
+
+    uint32_t ntohl(uint32_t networkValue) {
+        return ::ntohl(networkValue);
     }
 }

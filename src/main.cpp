@@ -14,7 +14,21 @@ int main() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     // Init random source array.
-    auto srcArray = ai::utils::CreateConsecutiveArray();
+    auto srcArray = ai::utils::CreateRandomArrayWithConsecutiveOrRangeElements();
+    //std::vector<unsigned> srcArray = { 10,9,8,7,6,5,6,7,8,9,10 };
+    //std::vector<unsigned> srcArray = { 10,9,8,7,6,5,1,2,1,2,1 };
+    //std::vector<unsigned> srcArray = { 1,2,1,2,1,2,3,4,5 };
+    //std::vector<unsigned> srcArray = { 1,2,1,1,1,1,1,2,1 };
+    //std::vector<unsigned> srcArray = { 1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1 };
+    //std::vector<unsigned> srcArray = { 6,5,4,3,2,1,1,1,1,1,1,1,1,1,1,1,1,2,3,4,5,6 };
+    //std::vector<unsigned> srcArray = { 1,2,3,4,5,6,6,6,6,6,6,6,6,6,6,5,4,3,2,1 };
+    //std::vector<unsigned> srcArray = { 6,6,6,6,6,6,6,6,6,6,1,8,3,3,15 };
+    //std::vector<unsigned> srcArray = { 6,6,6,6,6,6,6,6,6,6,1,2,3,4,5,6,7,8,8,8,8,8,8,8,8,8,8,8 };
+    //std::vector<unsigned> srcArray = { 1,8,3,3,15,6,6,6,6,6,6,6,6,6,6 };
+    //std::vector<unsigned> srcArray = { 1,8,3,3,9,10,11,12,13,14,15,6,6,6,6,6,6,6 };
+    //std::vector<unsigned> srcArray = { 1,8,3,3,15,6,6,6,6,6,6 };
+    //std::vector<unsigned> srcArray = { 1,8,3,6,7,6,6,6,6,6,6,6,7 };
+    //std::vector<unsigned> srcArray = { 1,8,3,6,7,6,6,6,6,6,6,7 };
 
 
     // Real test (and example) for compressing and uncompressing.
@@ -52,10 +66,19 @@ int main() {
     std::cout << "Compressed size: " << sizeof(uint8_t) * compressed.size() << "\n\n";
 
     ai::utils::PrintArray("Source array", srcArray);
+    //ai::utils::PrintArray<unsigned, unsigned>("Source array", srcArray);
 
     ai::utils::PrintArray("Compressed array", compressed);
+    //ai::utils::PrintArray<uint8_t, unsigned>("Compressed", compressed);
 
-    ai::utils::PrintArray("Uncompressed array", restoredArray);
+    ai::utils::PrintArray("Restored array", restoredArray);
+    //ai::utils::PrintArray<unsigned, unsigned>("Restored array", restoredArray);
+
+    bool equal = ai::utils::CompareArrays(srcArray, restoredArray);
+    assert(equal);
+    if (equal) {
+        std::cout << "Arrays are equal" << std::endl;
+    }
 
     std::cin.get();
     return 0;

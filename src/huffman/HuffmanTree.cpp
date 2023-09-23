@@ -2,12 +2,7 @@
 
 #include "HuffmanTree.h"
 
-#ifdef __linux__
-#include <arpa/inet.h>
-#elif _WIN32
-#include <winsock2.h>
-#pragma comment(lib, "ws2_32.lib")
-#endif
+#include "Utils.h"
 
 ai::HuffmanTree::~HuffmanTree()
 {
@@ -26,11 +21,11 @@ void ai::HuffmanTree::Free(Node* node) {
     node = nullptr;
 }
 
-std::vector<uint8_t> ai::HuffmanTree::Encode(const std::vector<char>& chars) {
-    InitFreqTable(chars);
+std::vector<uint8_t> ai::HuffmanTree::Encode(const std::vector<uint8_t>& arr) {
+    InitFreqTable(arr);
     assert(!_freqTable.empty());    
     if (_freqTable.empty()) {
-        std::cerr << "Error: ai::HuffmanTree::Encode(): char frequency table is empty" << std::endl;
+        std::cerr << "Error: ai::HuffmanTree::Encode(): int8_t frequency table is empty" << std::endl;
         return {};
     }
 
@@ -44,18 +39,18 @@ std::vector<uint8_t> ai::HuffmanTree::Encode(const std::vector<char>& chars) {
     InitCodesTable();
     assert(!_codesTable.empty());    
     if (_codesTable.empty()) {
-        std::cerr << "Error: ai::HuffmanTree::Encode(): char codes table is empty" << std::endl;
+        std::cerr << "Error: ai::HuffmanTree::Encode(): int8_t codes table is empty" << std::endl;
         return {};
     }
 
-    std::vector<uint8_t> arr;
+    std::vector<uint8_t> data;
 
     size_t offset = 0;
-    WriteFreqTable(arr, offset);
+    WriteFreqTable(data, offset);
 
     uint32_t bitsSize = 0;
     std::vector<uint8_t> codes;
-    for (auto ch : chars) {
+    for (auto ch : arr) {
         const auto& code = _codesTable[ch];
         assert(!code.empty());
         if (code.empty()) {
@@ -85,20 +80,20 @@ std::vector<uint8_t> ai::HuffmanTree::Encode(const std::vector<char>& chars) {
         }
     }
 
-    uint32_t networkBitsSize = htonl(bitsSize);
-    arr.resize(offset + 4);
-    std::memcpy(arr.data() + offset, &networkBitsSize, sizeof(uint32_t));
+    uint32_t networkBitsSize = utils::htonl(bitsSize);
+    data.resize(offset + sizeof(uint32_t));
+    std::memcpy(data.data() + offset, &networkBitsSize, sizeof(uint32_t));
 
-    arr.insert(arr.end(), codes.begin(), codes.end());
+    data.insert(data.end(), codes.begin(), codes.end());
 
-    return arr;
+    return data;
 }
 
-std::vector<char> ai::HuffmanTree::Decode(const std::vector<uint8_t>& data, size_t offset) {
+std::vector<uint8_t> ai::HuffmanTree::Decode(const std::vector<uint8_t>& data, size_t offset) {
     ReadFreqTable(data, offset);
     assert(!_freqTable.empty());    
     if (_freqTable.empty()) {
-        std::cerr << "Error: ai::HuffmanTree::Decode(): char frequency table is empty" << std::endl;
+        std::cerr << "Error: ai::HuffmanTree::Decode(): int8_t frequency table is empty" << std::endl;
         return {};
     }
 
@@ -114,15 +109,15 @@ std::vector<char> ai::HuffmanTree::Decode(const std::vector<uint8_t>& data, size
 
     uint32_t networkBitsSize;
     std::memcpy(&networkBitsSize, data.data() + offset, sizeof(uint32_t));
-    uint32_t bitsSize = ntohl(networkBitsSize);
+    uint32_t bitsSize = utils::ntohl(networkBitsSize);
 
-    offset += 4;
+    offset += sizeof(uint32_t);
 
     if (bitsSize == 0) {
         return {};
     }
 
-    std::vector<char> chars;
+    std::vector<uint8_t> arr;
     auto node = _root;
     for (size_t i = 0; i != bitsSize; ++i) {
         size_t id = offset + i / 8;
@@ -132,12 +127,12 @@ std::vector<char> ai::HuffmanTree::Decode(const std::vector<uint8_t>& data, size
         node = (isBitSet ? node->right : node->left);
 
         if (node->value != 0) {
-            chars.push_back(node->value);
+            arr.push_back(node->value);
             node = _root;
         }
     }
 
-    return chars;
+    return arr;
 }
 
 void ai::HuffmanTree::InitCodesTable() {
@@ -158,7 +153,7 @@ void ai::HuffmanTree::InitCodesTable() {
 
         if (node->value != 0) {
 #ifdef DEBUG_BUILD
-            std::cout << "Char: " << (_isChar ? node->value : static_cast<unsigned>(node->value)) << ", freq: " << node->freq << ", ";
+            std::cout << "Char: " << static_cast<int>(node->value) << ", freq: " << node->freq << ", ";
             for (auto c : code) {
                 std::cout << static_cast<int>(c);
             }
@@ -228,18 +223,18 @@ void ai::HuffmanTree::ReadFreqTable(const std::vector<uint8_t>& data, size_t& of
     // Optimized for this task input.
     size_t size = static_cast<size_t>(data[offset++]);
 
-    // 5 bytes. First byte - char, others - uint32_t frequency of this char.
-    for (size_t i = 0; i <= 5 * size - 5; i += 5) {
+    unsigned step = 1 + sizeof(uint32_t);
+    for (size_t i = 0; i <= step * size - step; i += step) {
         size_t index = offset + i;
-        char ch = static_cast<char>(data[index]);
+        int8_t ch = static_cast<uint8_t>(data[index]);
 
         uint32_t networkFreq;
         std::memcpy(&networkFreq, data.data() + index + 1, sizeof(uint32_t));
 
-        _freqTable[ch] = ntohl(networkFreq);
+        _freqTable[ch] = utils::ntohl(networkFreq);
     }
 
-    offset += 5 * size;
+    offset += step * size;
 }
 
 
@@ -251,13 +246,13 @@ bool ai::HuffmanTree::NodeCompare::operator()(const ai::HuffmanTree::Node* l, co
     return l->freq > r->freq;
 }
 
-void ai::HuffmanTree::InitFreqTable(const std::vector<char>& chars) {
+void ai::HuffmanTree::InitFreqTable(const std::vector<uint8_t>& arr) {
     assert(_freqTable.empty());
     if (!_freqTable.empty()) {
         _freqTable.clear();
     }
 
-    for (char c : chars) {
+    for (int8_t c : arr) {
         ++_freqTable[c];
     }
 }
@@ -269,13 +264,13 @@ void ai::HuffmanTree::WriteFreqTable(std::vector<uint8_t>& data, size_t& offset)
     data.push_back(static_cast<uint8_t>(_freqTable.size()));
     ++offset;
 
-    data.resize(offset + 5 * _freqTable.size());
+    data.resize(offset + (1 + sizeof(uint32_t)) * _freqTable.size());
     for (auto& [ch, value] : _freqTable) {
         data[offset++] = static_cast<uint8_t>(ch);
 
         // For compatibility with other platforms...
-        uint32_t networkValue = htonl(value);
+        uint32_t networkValue = utils::htonl(value);
         std::memcpy(data.data() + offset, &networkValue, sizeof(uint32_t));
-        offset += 4;
+        offset += sizeof(uint32_t);
     }
 }
