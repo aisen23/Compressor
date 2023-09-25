@@ -12,7 +12,7 @@ namespace ai
         private:
             struct Node
             {
-                int8_t value = 0;
+                int8_t value = static_cast<uint8_t>(-1);
                 uint32_t freq = 0;
 
                 Node* left = nullptr;
@@ -45,8 +45,8 @@ namespace ai
         private:
             friend class HuffmanCompressorImpl;
             Node* _root = nullptr;
-            std::unordered_map<int8_t, std::vector<uint8_t>> _codesTable;
-            std::map<int8_t, uint32_t> _freqTable;
+            std::unordered_map<uint8_t, std::vector<uint8_t>> _codesTable;
+            std::map<uint8_t, uint32_t> _freqTable;
 
         private:
             HuffmanTree(const HuffmanTree&) = delete;

@@ -133,7 +133,7 @@ void TestCases() {
         bool equal = ai::utils::CompareArrays(srcArray, restoredArray);
         assert(equal);
         if (equal) {
-            std::cout << "Arrays are equal" << std::endl;
+            std::cout << "Arrays are equal\n\n\n\n";
         }
     }
 }

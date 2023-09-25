@@ -108,7 +108,7 @@ namespace ai
 
         std::vector<uint8_t> data; 
         uint8_t num = bytes[0];
-        if (bytes.size() == 1) {
+        if (bytes.size() == 1 && !_combined) {
             num |= (1 << 7);
         }
         data.push_back(num);
@@ -169,7 +169,7 @@ namespace ai
                 rangeValue = num;
             }
 
-            if (isLast) {
+            if (isLast && !_combined) {
                 num |= (1 << 7);
             }
 
@@ -265,5 +265,56 @@ namespace ai
         }
 
         return arr;
+    }
+
+    std::vector<unsigned> RLECompressorImpl::UncompressCombined(const std::vector<unsigned>& nums) {
+        if (nums.size() == 0) {
+            std::cerr << "Error: RLECompressorImpl::UncompressCombined(): No data" << std::endl;
+            return {};
+        }
+
+        auto nums2 = DecodeRLECombined(nums);
+        auto arr = DecodeRLERange(nums2);
+
+        return arr;
+    }
+
+    std::vector<unsigned> RLECompressorImpl::DecodeRLECombined(const std::vector<unsigned>& data) const {
+        if (data.size() == 0) {
+            std::cerr << "Error: RLECompressorImpl::DecodeRLECombined(): No data" << std::endl;
+            return {};
+        }
+
+        std::vector<unsigned> nums;
+        unsigned likeByte = ai::MAX_ELEM + 5;
+        for (size_t i = 0; i != data.size();) {
+            likeByte = data[i];
+
+            if (likeByte == ai::MAX_ELEM + 3) {
+                std::vector<uint8_t> temp(sizeof(uint32_t));
+                for (int j = 0; j != sizeof(uint32_t); ++j) {
+                    temp[j] = static_cast<uint8_t>(data[i + j + 1]);
+                }
+
+                uint32_t networkRangeValue;
+                std::memcpy(&networkRangeValue, temp.data(), sizeof(uint32_t));
+                uint32_t rangeValue = ai::utils::ntohl(networkRangeValue);
+                
+                size_t index = i + sizeof(uint32_t) + 1;
+                unsigned num = data[index];
+                for (size_t i = 0; i < rangeValue; ++i) {
+                    nums.push_back(num);
+                }
+
+                i += (sizeof(uint32_t) + 1);
+            }
+            else {
+                nums.push_back(likeByte);
+            }
+
+            ++i;
+        }
+
+        return nums;
     }
 } // ai

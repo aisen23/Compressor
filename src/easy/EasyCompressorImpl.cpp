@@ -14,7 +14,7 @@ std::vector<uint8_t> ai::EasyCompressorImpl::Compress(const std::vector<unsigned
     for (size_t i = 0; i != arr.size(); ++i) {
         data[i] = static_cast<uint8_t>(arr[i]);
         bool isLast = i == arr.size() - 1;
-        if (isLast) {
+        if (isLast && !_combined) {
             // Last element with the highest bit. It can be useful when we send this info to other machine.
             data[i] |= (1 << 7);
         }

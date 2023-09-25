@@ -4,6 +4,9 @@
 
 namespace ai
 {
+    /** I think this implementer is not reasonable
+     * to use in CombinedCompressorImpl
+     * */
     class EasyCompressorImpl : public CompressorImpl
     {
     public:

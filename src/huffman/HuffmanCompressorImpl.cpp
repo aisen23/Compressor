@@ -12,9 +12,7 @@ std::vector<uint8_t> ai::HuffmanCompressorImpl::Compress(const std::vector<unsig
     }
 
     HuffmanTree tree;
-    auto data = tree.Encode(arr8);
-
-    return data;
+    return tree.Encode(arr8);
 }
 
 std::vector<unsigned> ai::HuffmanCompressorImpl::Uncompress(const std::vector<uint8_t>& data, size_t offset) {
@@ -31,6 +29,11 @@ std::vector<unsigned> ai::HuffmanCompressorImpl::Uncompress(const std::vector<ui
     }
 
     return arr;
+}
+
+std::vector<uint8_t> ai::HuffmanCompressorImpl::CompressCombined(const std::vector<uint8_t>& bytes) {
+    HuffmanTree tree;
+    return tree.Encode(bytes);
 }
 
 

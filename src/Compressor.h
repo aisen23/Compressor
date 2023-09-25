@@ -21,6 +21,14 @@ namespace ai
 
         virtual std::vector<uint8_t> Compress(const std::vector<unsigned>& arr) = 0;
         virtual std::vector<unsigned> Uncompress(const std::vector<uint8_t>& data, size_t offset) = 0;
+
+    protected:
+        friend class CombinedCompressorImpl;
+        virtual std::vector<uint8_t> CompressCombined(const std::vector<uint8_t>& bytes) { return {}; };
+        virtual std::vector<unsigned> UncompressCombined(const std::vector<unsigned>& nums) { return {}; };
+
+    protected:
+        bool _combined = false;
     };
 
 
@@ -51,6 +59,12 @@ namespace ai
 
         std::vector<uint8_t> CompressWithRLE(const std::vector<unsigned>& arr) const;
         std::vector<unsigned> UncompressWithRLE(const std::vector<uint8_t>& data, size_t offset) const;
+
+        std::vector<uint8_t> CompressWithCombined(const std::vector<unsigned>& arr, eCompressorImplType type) const;
+        std::vector<unsigned> UncompressWithCombined(const std::vector<uint8_t>& data, size_t offset, eCompressorImplType type) const;
+
+        std::vector<eCompressorImplType> GetCombinedCompressorTypes(eCompressorImplType type) const;
+        std::vector<eCompressorImplType> GetCombinedUncompressorTypes(eCompressorImplType type) const;
 
     private:
         eCompressorType _type;

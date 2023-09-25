@@ -126,7 +126,7 @@ std::vector<uint8_t> ai::HuffmanTree::Decode(const std::vector<uint8_t>& data, s
         bool isBitSet = (data[id] & (1 << bitPos)) != 0;
         node = (isBitSet ? node->right : node->left);
 
-        if (node->value != 0) {
+        if (static_cast<int8_t>(node->value) != -1) {
             arr.push_back(node->value);
             node = _root;
         }
@@ -151,7 +151,7 @@ void ai::HuffmanTree::InitCodesTable() {
 
         queue.pop();
 
-        if (node->value != 0) {
+        if (static_cast<int8_t>(node->value) != -1) {
 #ifdef DEBUG_BUILD
             std::cout << "Char: " << static_cast<int>(node->value) << ", freq: " << node->freq << ", ";
             for (auto c : code) {
