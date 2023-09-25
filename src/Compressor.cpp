@@ -17,8 +17,8 @@ std::vector<uint8_t> ai::Compressor::Compress(const std::vector<unsigned>& arr) 
 
     std::vector<std::vector<uint8_t>> datas;
 
-    datas.push_back(CompressWithEasy(arr));
-    datas.push_back(CompressWithHuffman(arr));
+    //datas.push_back(CompressWithEasy(arr));
+    //datas.push_back(CompressWithHuffman(arr));
     datas.push_back(CompressWithRLE(arr));
 
 
