@@ -8,29 +8,53 @@
 namespace ai
 {
     std::vector<uint8_t> RLECompressorImpl::Compress(const std::vector<unsigned>& arr) {
-        std::vector<uint8_t> bytes;
         if (arr.size() == 0) {
-            std::cerr << "Error: RLE::Compressor::Encode(): No input numbers" << std::endl;
+            std::cerr << "Error: RLECompressorImpl::Compress(): No input numbers" << std::endl;
             return {};
         }
 
+        auto bytes = EncodeRLERange(arr);
+        auto data = EncodeRLE(bytes);
+
+        return data;
+    }
+
+    std::vector<unsigned> RLECompressorImpl::Uncompress(const std::vector<uint8_t>& data, size_t offset) {
+        if (data.size() == 0) {
+            std::cerr << "Error: RLECompressorImpl::Uncompress(): No data" << std::endl;
+            return {};
+        }
+
+        auto nums = DecodeRLE(data, offset);
+        auto arr = DecodeRLERange(nums);
+
+        return arr;
+    }
+
+    std::vector<uint8_t> RLECompressorImpl::EncodeRLERange(const std::vector<unsigned>& arr) const {
+        if (arr.size() == 0) {
+            std::cerr << "Error: RLECompressorImpl::EncodeRLERange(): No input numbers" << std::endl;
+            return {};
+        }
+
+        std::vector<uint8_t> data;
         // RLE Range.
         size_t incCount = 0;
         size_t decCount = 0;
         uint8_t num = arr[0];
         uint8_t prev = num;
-        uint8_t effCount = 2;
-        bytes.push_back(num);
+        uint32_t effCount = 2;
+        data.push_back(num);
         for (size_t i = 1; i != arr.size(); ++i) {
             num = static_cast<uint8_t>(arr[i]);
             if (num == prev + 1) {
                 ++incCount;
-                // Put into bytes just if it gives us the space saving.
+                // Put into data just if it gives us the space saving.
                 if (incCount > effCount) {
                     if (incCount == effCount + 1) {
-                        bytes.pop_back();
-                        bytes.pop_back();
-                        bytes.push_back(static_cast<uint8_t>(ai::MAX_ELEM + 1));
+                        data.pop_back();
+                        data.pop_back();
+                        data.push_back(static_cast<uint8_t>(ai::MAX_ELEM + 1));
                     }
                     if (i != arr.size() - 1) {
                         prev = num;
@@ -40,7 +64,7 @@ namespace ai
             }
             else {
                 if (incCount > effCount) {
-                    bytes.push_back(prev);
+                    data.push_back(prev);
                 }
 
                 incCount = 0;
@@ -50,9 +74,9 @@ namespace ai
                 ++decCount;
                 if (decCount > effCount) {
                     if (decCount == effCount + 1) {
-                        bytes.pop_back();
-                        bytes.pop_back();
-                        bytes.push_back(static_cast<uint8_t>(ai::MAX_ELEM + 2));
+                        data.pop_back();
+                        data.pop_back();
+                        data.push_back(static_cast<uint8_t>(ai::MAX_ELEM + 2));
                     }
                     if (i != arr.size() - 1) {
                         prev = num;
@@ -62,20 +86,28 @@ namespace ai
             }
             else {
                 if (decCount > effCount) {
-                    bytes.push_back(prev);
+                    data.push_back(prev);
                 }
 
                 decCount = 0;
             }
             
-            bytes.push_back(num);
+            data.push_back(num);
 
             prev = static_cast<uint8_t>(arr[i]);
         }
 
-        // RLE
+        return data;
+    }
+
+    std::vector<uint8_t> RLECompressorImpl::EncodeRLE(const std::vector<uint8_t>& bytes) const {
+        if (bytes.size() == 0) {
+            std::cerr << "Error: RLECompressorImpl::EncodeRLE(): No input numbers" << std::endl;
+            return {};
+        }
+
         std::vector<uint8_t> data; 
-        num = bytes[0];
+        uint8_t num = bytes[0];
         if (bytes.size() == 1) {
             num |= (1 << 7);
         }
@@ -83,7 +115,7 @@ namespace ai
 
         uint32_t rangeCount = 1;
         uint8_t rangeValue = bytes[0];
-        effCount = 6;
+        uint32_t effCount = 6;
         bool creatingRange = false;
         for (size_t i = 1; i != bytes.size(); ++i) {
             num = bytes[i];
@@ -144,20 +176,17 @@ namespace ai
             if (isLast || !creatingRange) {
                 data.push_back(num);
             }
-
-            prev = num;
         }
 
         return data;
     }
 
-    std::vector<unsigned> RLECompressorImpl::Uncompress(const std::vector<uint8_t>& data, size_t offset) {
+    std::vector<unsigned> RLECompressorImpl::DecodeRLE(const std::vector<uint8_t>& data, size_t offset) const {
         if (data.size() == 0) {
-            std::cerr << "Error: RLE::Compressor::Encode(): No input numbers" << std::endl;
+            std::cerr << "Error: RLECompressorImpl::DecodeRLE(): No data" << std::endl;
             return {};
         }
 
-        // RLE
         std::vector<unsigned> nums;
         uint8_t byte = ai::MAX_ELEM + 5;
         for (size_t i = offset; i != data.size();) {
@@ -191,13 +220,22 @@ namespace ai
             ++i;
         }
 
+        return nums;
+    }
+
+    std::vector<unsigned> RLECompressorImpl::DecodeRLERange(const std::vector<unsigned>& nums) const {
+        if (nums.size() == 0) {
+            std::cerr << "Error: RLECompressorImpl::DecodeRLE(): No numbers" << std::endl;
+            return {};
+        }
+
         std::vector<unsigned> arr;
         unsigned prev = ai::MAX_ELEM + 5;
         unsigned next = ai::MAX_ELEM + 5;
         unsigned num = ai::MAX_ELEM + 5;
         for (size_t i = 0; i != nums.size();) {
             if (i < nums.size() - 1) {
-                next = static_cast<unsigned>(nums[i + 1]);
+                next = nums[i + 1];
             }
 
             num = nums[i];
@@ -207,18 +245,18 @@ namespace ai
                 || static_cast<unsigned>(num == ai::MAX_ELEM + 2))
             {
                 assert(i > 0 && i < nums.size() - 1);
-                bool increasing = static_cast<unsigned>(num) == ai::MAX_ELEM + 1;
-                for (uint8_t num = prev + (increasing ? 1 : -1);
+                bool increasing = (num == ai::MAX_ELEM + 1);
+                for (unsigned num = prev + (increasing ? 1 : -1);
                         num != next; 
                         increasing ? ++num : --num)
                 {
-                    arr.push_back(static_cast<unsigned>(num));
+                    arr.push_back(num);
                 }
 
                 prev = num;
             }
             else {
-                arr.push_back(static_cast<unsigned>(num));
+                arr.push_back(num);
 
                 prev = num;
             }
