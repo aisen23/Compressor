@@ -4,9 +4,11 @@
 
 #include "clock/Clock.h"
 #include "combined/CombinedCompressorImpl.h"
+#include "Input.h"
 #include "huffman/HuffmanCompressorImpl.h"
 #include "easy/EasyCompressorImpl.h"
 #include "rle/RLECompressorImpl.h"
+#include "threads/ThreadPool.h"
 
 ai::Compressor::Compressor(ai::eCompressorType type)
     :_type(type)
@@ -19,10 +21,38 @@ std::vector<uint8_t> ai::Compressor::Compress(const std::vector<unsigned>& arr) 
 
     std::vector<std::vector<uint8_t>> datas;
 
-    datas.push_back(CompressWithEasy(arr));
-    datas.push_back(CompressWithHuffman(arr));
-    datas.push_back(CompressWithRLE(arr));
-    datas.push_back(CompressWithCombined(arr, eCompressorImplType::RLE_Huffman));
+    bool multithreading = ai::THREADS_NUM > 0;
+
+    if (multithreading) {
+        std::vector<std::future<std::vector<uint8_t>>> futures;
+        auto& pool = ThreadPool::Instance();
+
+        futures.push_back(pool.Submit([this, &arr]() {
+            return this->CompressWithEasy(arr);
+        }));
+
+        futures.push_back(pool.Submit([this, &arr]() {
+            return this->CompressWithHuffman(arr);
+        }));
+
+        futures.push_back(pool.Submit([this, &arr]() {
+            return this->CompressWithRLE(arr);
+        }));
+
+        futures.push_back(pool.Submit([this, &arr]() {
+            return this->CompressWithCombined(arr, eCompressorImplType::RLE_Huffman);
+        }));
+
+        for (auto& f : futures) {
+            datas.push_back(f.get());
+        }
+    }
+    else {
+        datas.push_back(CompressWithEasy(arr));
+        datas.push_back(CompressWithHuffman(arr));
+        datas.push_back(CompressWithRLE(arr));
+        datas.push_back(CompressWithCombined(arr, eCompressorImplType::RLE_Huffman));
+    }
 
 
 // -=-= -=-= -=- =- =- =- Calculate the effective compression =- = =- =-= -=- = -=- =- =

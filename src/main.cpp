@@ -2,6 +2,7 @@
 
 #include "clock/Clock.h"
 #include "Compressor.h"
+#include "threads/ThreadPool.h"
 #include "Utils.h"
 
 #include <stdlib.h>
@@ -15,12 +16,17 @@ void TestCases();
 int main() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
+    // Init ThreadPool.
+    ai::ThreadPool::Instance();
+
     bool test = false;
     if (test) {
         TestCases();
     }
     else {
+        //auto srcArray = ai::utils::CreateRandomArray();
         auto srcArray = ai::utils::CreateRandomArrayWithConsecutiveOrRangeElements();
+        //auto srcArray = ai::utils::CreateConsecutiveArray();
 
         // Real test (and example) for compressing and uncompressing.
         std::vector<uint8_t> compressed;
@@ -34,14 +40,25 @@ int main() {
                 ai::Compressor compressor(ai::eCompressorType::Compressor);
                 compressed = compressor.Compress(srcArray);
 
+#ifdef BENCHMARKING
+                std::cout << "\n";
+#endif
                 clock.PrintDuration(startCompressTime, "Compressing duration");
             }
+
+#ifdef BENCHMARKING
+            std::cout << "\n\n";
+#endif
 
             {
                 auto startDecompressTime = clock.Now();
 
                 ai::Compressor uncompressor(ai::eCompressorType::Uncompressor);
                 restoredArray = uncompressor.Uncompress(compressed);
+
+#ifdef BENCHMARKING
+                std::cout << "\n";
+#endif
 
                 clock.PrintDuration(startDecompressTime, "Decompressing duration");
                 std::cout << "\n";

@@ -2,6 +2,8 @@
 
 #include "ThreadPool.h"
 
+#include "Input.h"
+
 ai::ThreadPool& ai::ThreadPool::Instance() {
     static ThreadPool instance;
     return instance;
@@ -9,12 +11,13 @@ ai::ThreadPool& ai::ThreadPool::Instance() {
 
 ai::ThreadPool::ThreadPool()
 {
-    /*int numThreads = std::thread::hardware_concurrency() - 1;
-    if (numThreads < 4) {
-        numThreads = 8;
-    }*/
-
-    int numThreads = 1;
+    int numThreads = ai::THREADS_NUM;
+    if (numThreads == 0) {
+        numThreads = std::thread::hardware_concurrency() - 1;
+        if (numThreads < 4) {
+            numThreads = 8;
+        }
+    }
 
     for (size_t i = 0; i < numThreads; ++i) {
         _workers.emplace_back([this] {
