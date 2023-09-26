@@ -114,11 +114,11 @@ namespace ai::utils
         return true;
     }
 
-    uint32_t htonl(uint32_t hostValue) {
-        return ::htonl(hostValue);
+    uint32_t Htonl(uint32_t hostValue) {
+        return htonl(hostValue);
     }
 
-    uint32_t ntohl(uint32_t networkValue) {
-        return ::ntohl(networkValue);
+    uint32_t Ntohl(uint32_t networkValue) {
+        return ntohl(networkValue);
     }
 }

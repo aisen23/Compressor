@@ -14,7 +14,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-    include(${CMAKE_CURRENT_SOURCE_DIR}/configs/linux.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/linux.cmake)
 endif()
 
 add_compile_definitions(BENCHMARKING)

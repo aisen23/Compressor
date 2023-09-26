@@ -18,8 +18,8 @@ namespace ai
         bool CompareArrays(const std::vector<unsigned>& arr1,
                             const std::vector<unsigned>& arr2);
 
-        uint32_t htonl(uint32_t hostValue);
-        uint32_t ntohl(uint32_t networkValue);
+        uint32_t Htonl(uint32_t hostValue);
+        uint32_t Ntohl(uint32_t networkValue);
 
         /** Test function:
          * printing first 10, mid 10 and last 10 elements of array

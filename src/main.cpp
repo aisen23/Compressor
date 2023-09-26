@@ -2,6 +2,7 @@
 
 #include "clock/Clock.h"
 #include "Compressor.h"
+#include "Input.h"
 #include "threads/ThreadPool.h"
 #include "Utils.h"
 
@@ -16,8 +17,10 @@ void TestCases();
 int main() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    // Init ThreadPool.
-    ai::ThreadPool::Instance();
+    // Init Threads.
+    if (ai::THREADS_NUM > 0) {
+        ai::ThreadPool::Instance();
+    }
 
     bool test = false;
     if (test) {

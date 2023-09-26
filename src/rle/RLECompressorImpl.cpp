@@ -156,7 +156,7 @@ namespace ai
             if (needAddRangeInfo) {
                 std::vector<uint8_t> temp(sizeof(uint32_t));
 
-                uint32_t networkRangeCount = ai::utils::htonl(rangeCount);
+                uint32_t networkRangeCount = ai::utils::Htonl(rangeCount);
                 std::memcpy(temp.data(), &networkRangeCount, sizeof(uint32_t));
 
                 data.insert(data.end(), temp.begin(), temp.end());
@@ -199,7 +199,7 @@ namespace ai
             if (static_cast<unsigned>(byte) == ai::MAX_ELEM + 3) {
                 uint32_t networkRangeValue;
                 std::memcpy(&networkRangeValue, data.data() + i + 1, sizeof(uint32_t));
-                uint32_t rangeValue = ai::utils::ntohl(networkRangeValue);
+                uint32_t rangeValue = ai::utils::Ntohl(networkRangeValue);
                 
                 size_t index = i + sizeof(uint32_t) + 1;
                 uint8_t value = data[index];
@@ -298,7 +298,7 @@ namespace ai
 
                 uint32_t networkRangeValue;
                 std::memcpy(&networkRangeValue, temp.data(), sizeof(uint32_t));
-                uint32_t rangeValue = ai::utils::ntohl(networkRangeValue);
+                uint32_t rangeValue = ai::utils::Ntohl(networkRangeValue);
                 
                 size_t index = i + sizeof(uint32_t) + 1;
                 unsigned num = data[index];

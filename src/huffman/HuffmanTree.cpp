@@ -80,7 +80,7 @@ std::vector<uint8_t> ai::HuffmanTree::Encode(const std::vector<uint8_t>& arr) {
         }
     }
 
-    uint32_t networkBitsSize = utils::htonl(bitsSize);
+    uint32_t networkBitsSize = utils::Htonl(bitsSize);
     data.resize(offset + sizeof(uint32_t));
     std::memcpy(data.data() + offset, &networkBitsSize, sizeof(uint32_t));
 
@@ -109,7 +109,7 @@ std::vector<uint8_t> ai::HuffmanTree::Decode(const std::vector<uint8_t>& data, s
 
     uint32_t networkBitsSize;
     std::memcpy(&networkBitsSize, data.data() + offset, sizeof(uint32_t));
-    uint32_t bitsSize = utils::ntohl(networkBitsSize);
+    uint32_t bitsSize = utils::Ntohl(networkBitsSize);
 
     offset += sizeof(uint32_t);
 
@@ -231,7 +231,7 @@ void ai::HuffmanTree::ReadFreqTable(const std::vector<uint8_t>& data, size_t& of
         uint32_t networkFreq;
         std::memcpy(&networkFreq, data.data() + index + 1, sizeof(uint32_t));
 
-        _freqTable[ch] = utils::ntohl(networkFreq);
+        _freqTable[ch] = utils::Ntohl(networkFreq);
     }
 
     offset += step * size;
@@ -269,7 +269,7 @@ void ai::HuffmanTree::WriteFreqTable(std::vector<uint8_t>& data, size_t& offset)
         data[offset++] = static_cast<uint8_t>(ch);
 
         // For compatibility with other platforms...
-        uint32_t networkValue = utils::htonl(value);
+        uint32_t networkValue = utils::Htonl(value);
         std::memcpy(data.data() + offset, &networkValue, sizeof(uint32_t));
         offset += sizeof(uint32_t);
     }
