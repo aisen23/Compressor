@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(as_test_1)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_CXX_STANDARD_REQUIRED FALSE)
 set(CMAKE_CXX_STANDARD 17)
@@ -16,6 +16,8 @@ endif()
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
     include(${CMAKE_CURRENT_SOURCE_DIR}/configs/linux.cmake)
 endif()
+
+add_compile_definitions(BENCHMARKING)
 
 include_directories(src)
 file(GLOB_RECURSE SRC_FILES src/*.h src/*/*.h src/*.cpp src/*/*.cpp)

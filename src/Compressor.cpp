@@ -2,6 +2,7 @@
 
 #include "Compressor.h"
 
+#include "clock/Clock.h"
 #include "combined/CombinedCompressorImpl.h"
 #include "huffman/HuffmanCompressorImpl.h"
 #include "easy/EasyCompressorImpl.h"
@@ -36,7 +37,6 @@ std::vector<uint8_t> ai::Compressor::Compress(const std::vector<unsigned>& arr) 
         }
     }
 
-    // TODO: check address and std::move.
     return std::move(datas[minIndex]);
 }
 
@@ -88,55 +88,107 @@ ai::eCompressorImplType ai::Compressor::ReadImplType(const std::vector<uint8_t>&
 }
 
 std::vector<uint8_t> ai::Compressor::CompressWithHuffman(const std::vector<unsigned>& arr) const {
+    Clock clock;
+    auto start = clock.Now();
+
     auto data = WriteImplType(eCompressorImplType::Huffman);
     HuffmanCompressorImpl impl;
     auto implData = impl.Compress(arr);
     data.insert(data.end(), implData.begin(), implData.end());
+
+    clock.PrintDuration(start, "HuffmanCompressor");
+
     return data;
 }
 
 std::vector<unsigned> ai::Compressor::UncompressWithHuffman(const std::vector<uint8_t>& data, size_t offset) const {
+    Clock clock;
+    auto start = clock.Now();
+    
     HuffmanCompressorImpl impl;
-    return impl.Uncompress(data, offset);
+    auto arr = impl.Uncompress(data, offset);
+
+    clock.PrintDuration(start, "HuffmanUncompressor");
+
+    return arr;
 }
 
 std::vector<uint8_t> ai::Compressor::CompressWithEasy(const std::vector<unsigned>& arr) const {
+    Clock clock;
+    auto start = clock.Now();
+
     auto data = WriteImplType(eCompressorImplType::Easy);
     EasyCompressorImpl impl;
     auto implData = impl.Compress(arr);
     data.insert(data.end(), implData.begin(), implData.end());
+
+    clock.PrintDuration(start, "EasyCompressor");
+
     return data;
 }
 
 std::vector<unsigned> ai::Compressor::UncompressWithEasy(const std::vector<uint8_t>& data, size_t offset) const {
+    Clock clock;
+    auto start = clock.Now();
+
     EasyCompressorImpl impl;
-    return impl.Uncompress(data, offset);
+    auto arr = impl.Uncompress(data, offset);
+
+    clock.PrintDuration(start, "EasyCompressor");
+
+    return arr;
 }
 
 std::vector<uint8_t> ai::Compressor::CompressWithRLE(const std::vector<unsigned>& arr) const {
+    Clock clock;
+    auto start = clock.Now();
+
     auto data = WriteImplType(eCompressorImplType::RLE);
     RLECompressorImpl impl;
     auto implData = impl.Compress(arr);
     data.insert(data.end(), implData.begin(), implData.end());
+
+    clock.PrintDuration(start, "RLECompressor");
+
     return data;
 }
 
 std::vector<unsigned> ai::Compressor::UncompressWithRLE(const std::vector<uint8_t>& data, size_t offset) const {
+    Clock clock;
+    auto start = clock.Now();
+
     RLECompressorImpl impl;
-    return impl.Uncompress(data, offset);
+    auto arr = impl.Uncompress(data, offset);
+
+    clock.PrintDuration(start, "RLEUncompressor");
+
+    return arr;
 }
 
 std::vector<uint8_t> ai::Compressor::CompressWithCombined(const std::vector<unsigned>& arr, eCompressorImplType type) const {
+    Clock clock;
+    auto start = clock.Now();
+
     auto data = WriteImplType(type);
     CombinedCompressorImpl impl(GetCombinedCompressorTypes(type));
     auto implData = impl.Compress(arr);
     data.insert(data.end(), implData.begin(), implData.end());
+
+    clock.PrintDuration(start, "CombinedCompressor");
+
     return data;
 }
 
 std::vector<unsigned> ai::Compressor::UncompressWithCombined(const std::vector<uint8_t>& data, size_t offset, eCompressorImplType type) const {
+    Clock clock;
+    auto start = clock.Now();
+
     CombinedCompressorImpl impl(GetCombinedUncompressorTypes(type));
-    return impl.Uncompress(data, offset);
+    auto arr = impl.Uncompress(data, offset);
+
+    clock.PrintDuration(start, "CombinedUncompressor");
+
+    return arr;
 }
 
 std::vector<ai::eCompressorImplType> ai::Compressor::GetCombinedCompressorTypes(eCompressorImplType type) const {

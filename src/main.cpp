@@ -15,7 +15,7 @@ void TestCases();
 int main() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    bool test = true;
+    bool test = false;
     if (test) {
         TestCases();
     }
@@ -34,8 +34,7 @@ int main() {
                 ai::Compressor compressor(ai::eCompressorType::Compressor);
                 compressed = compressor.Compress(srcArray);
 
-                std::cout << "Compressing duration: ";
-                clock.PrintDuration(startCompressTime);
+                clock.PrintDuration(startCompressTime, "Compressing duration");
             }
 
             {
@@ -44,8 +43,7 @@ int main() {
                 ai::Compressor uncompressor(ai::eCompressorType::Uncompressor);
                 restoredArray = uncompressor.Uncompress(compressed);
 
-                std::cout << "Decompressing duration: ";
-                clock.PrintDuration(startDecompressTime);
+                clock.PrintDuration(startDecompressTime, "Decompressing duration");
                 std::cout << "\n";
             }
         }
@@ -102,8 +100,7 @@ void TestCases() {
                 ai::Compressor compressor(ai::eCompressorType::Compressor);
                 compressed = compressor.Compress(srcArray);
 
-                std::cout << "Compressing duration: ";
-                clock.PrintDuration(startCompressTime);
+                clock.PrintDuration(startCompressTime, "Compressing duration");
             }
 
             {
@@ -112,8 +109,7 @@ void TestCases() {
                 ai::Compressor uncompressor(ai::eCompressorType::Uncompressor);
                 restoredArray = uncompressor.Uncompress(compressed);
 
-                std::cout << "Decompressing duration: ";
-                clock.PrintDuration(startDecompressTime);
+                clock.PrintDuration(startDecompressTime, "Decompressing duration");
                 std::cout << "\n";
             }
         }
