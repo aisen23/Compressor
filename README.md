@@ -1,4 +1,4 @@
-# AS_Test1
+# This Compressor compress numbers from 1 to 100.
 
 All classes and functions optimized for
-input data of this task (integers from 1 to 100)
+input data (integers from 1 to 100)
